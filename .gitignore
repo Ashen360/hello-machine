@@ -1,2 +1,11 @@
 case-study/
 .claude/
+
+# Private working notes and agent context: never publish
+docs/
+HANDOFF*.md
+SEED*.md
+PROGRESS*.md
+TODO*.md
+CODEBASE.md
+CLAUDE.md
