@@ -1,10 +1,10 @@
-# BUILD — The Language of Machines
+# Hello, Machine
 
 An interactive history of programming, told as the history of humans learning to talk to machines.
 
-**Live:** https://ashen360.github.io/BUILD/
+**Live:** https://ashen360.github.io/hello-machine/
 
-![BUILD, chapter 01: a punched card that spells HELLO, MACHINE.](og.jpg)
+![Hello, Machine, chapter 01: a punched card that spells HELLO, MACHINE.](og.jpg)
 
 ## The idea
 
