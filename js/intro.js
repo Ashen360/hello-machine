@@ -19,12 +19,12 @@
   function dismiss(){
     if(dismissed) return; dismissed=true;
     wrap.classList.add('hide');
-    document.getElementById('nav').classList.add('on');
-    document.getElementById('era-label').classList.add('on');
+    ['nav','era-label','message','progress'].forEach(id=>document.getElementById(id).classList.add('on'));
     window.removeEventListener('keydown',dismiss);
     window.removeEventListener('wheel',dismiss);
     window.removeEventListener('touchstart',dismiss);
   }
+  document.getElementById('intro-enter').addEventListener('click',dismiss);
   window.addEventListener('keydown',dismiss);
   window.addEventListener('wheel',dismiss,{passive:true});
   window.addEventListener('touchstart',dismiss,{passive:true});

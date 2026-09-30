@@ -16,9 +16,14 @@
     ['2015','Kubernetes — thousands of programs, orchestrated'],
   ];
   const grid = document.getElementById('dense-grid');
-  items.forEach(([k,v])=>{
+  items.forEach(([k,v],i)=>{
     const cell=document.createElement('div'); cell.className='dense-cell';
+    cell.style.setProperty('--i', i);
     cell.innerHTML = `<div class="k">${k}</div><div class="v">${v}</div>`;
     grid.appendChild(cell);
   });
+  if(!ML.reduceMotion){
+    grid.classList.add('armed');
+    ML.onScreenGate(grid, ()=>grid.classList.add('in'), ()=>{});
+  }
 })();

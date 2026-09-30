@@ -20,7 +20,7 @@
   const labelsEl = document.getElementById('ladder-labels');
   steps.forEach((s,i)=>{
     const span=document.createElement('span');
-    span.textContent=s.label; span.dataset.i=i;
+    span.textContent=s.label; span.dataset.i=i; span.setAttribute('aria-hidden','true');
     span.addEventListener('click',()=>setStep(i));
     labelsEl.appendChild(span);
   });
@@ -32,6 +32,8 @@
     const pct = i/(steps.length-1)*100;
     fill.style.width=pct+'%'; handle.style.left=pct+'%';
     handle.setAttribute('aria-valuenow',i);
+    handle.setAttribute('aria-valuetext',steps[i].label);
+    window.dispatchEvent(new CustomEvent('ml:ladder',{detail:{label:steps[i].label, code:steps[i].code}}));
     display.style.opacity=0;
     setTimeout(()=>{ display.textContent = steps[i].code; display.style.opacity=1; },120);
     [...labelsEl.children].forEach((s,si)=>s.classList.toggle('active',si===i));
@@ -49,7 +51,9 @@
   window.addEventListener('pointerup',()=>dragging=false);
   window.addEventListener('pointermove',e=>{ if(dragging) setStep(posToStep(e.clientX)); });
   handle.addEventListener('keydown',e=>{
-    if(e.key==='ArrowRight') setStep(current+1);
-    if(e.key==='ArrowLeft') setStep(current-1);
+    if(e.key==='ArrowRight' || e.key==='ArrowUp'){ e.preventDefault(); setStep(current+1); }
+    if(e.key==='ArrowLeft' || e.key==='ArrowDown'){ e.preventDefault(); setStep(current-1); }
+    if(e.key==='Home'){ e.preventDefault(); setStep(0); }
+    if(e.key==='End'){ e.preventDefault(); setStep(steps.length-1); }
   });
 })();

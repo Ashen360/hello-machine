@@ -12,9 +12,11 @@
 <link rel="stylesheet" href="css/chapters.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script defer src="js/core.js"></script>
+<script defer src="js/message.js"></script>
 <script defer src="js/intro.js"></script>
 <script defer src="js/nav.js"></script>
 <script defer src="js/punchcard.js"></script>
+<script defer src="js/valves.js"></script>
 <script defer src="js/ladder.js"></script>
 <script defer src="js/terminal.js"></script>
 <script defer src="js/network.js"></script>
@@ -29,11 +31,13 @@
 <!-- INTRO -->
 <div id="intro">
   <div id="intro-text"><span id="intro-typed"></span><span class="cursor-blink">&nbsp;</span></div>
-  <div id="intro-cue">scroll, or press any key</div>
+  <div id="intro-cue">scroll, or press any key <button id="intro-enter" type="button">enter &crarr;</button></div>
 </div>
 
 <div id="era-label">00 · Before Code</div>
-<nav id="nav"></nav>
+<div id="progress" aria-hidden="true"><div id="progress-fill"></div></div>
+<nav id="nav" aria-label="Chapters"></nav>
+<div id="message" aria-hidden="true"><span class="msg-k">message</span><span id="message-v"></span></div>
 
 <main>
 
@@ -49,7 +53,7 @@
       </div>
       <div>
         <div id="punchcard-stage"></div>
-        <div class="stage-hint">drag the card</div>
+        <div class="stage-hint">this card reads <span class="cmd">HELLO, MACHINE.</span> · drag it, or use the arrow keys</div>
       </div>
     </div>
   </div>
@@ -59,17 +63,16 @@
 <section class="chapter" id="ch02" data-era="02">
   <div class="chapter-inner">
     <div class="layout">
-      <div class="tube-rack" aria-hidden="true">
-        <div class="tube"></div><div class="tube"></div><div class="tube"></div>
-        <div class="tube"></div><div class="tube"></div><div class="tube"></div>
-        <div class="tube"></div><div class="tube"></div><div class="tube"></div>
-        <div class="tube"></div><div class="tube"></div><div class="tube"></div>
+      <div class="valves">
+        <div class="valve-rack" id="valve-rack" role="group" aria-label="Eight valves, one byte of memory"></div>
+        <div class="valve-readout mono" aria-live="polite"><span id="valve-bin">00000000</span><span class="eq">=</span><span id="valve-dec">0</span><span class="eq">=</span><span id="valve-chr">&middot;</span></div>
+        <div class="stage-hint" id="valve-goal">switch the valves to spell <span class="cmd">H</span></div>
       </div>
       <div>
         <div class="eyebrow">02 — 1943 to 1949</div>
         <h2 class="ch-title">The machine<br>gets a memory.</h2>
-        <p class="lede">ENIAC filled a room. Colossus broke ciphers by the second. But every new task meant rewiring the machine by hand — programming as an act of physical labor.</p>
-        <p class="body-txt">Grace Hopper and others pushed for something stranger: a machine that could store its own instructions alongside its data, and rewrite them. Binary — a language of nothing but on and off — became the only dialect the hardware would ever natively understand.</p>
+        <p class="lede">ENIAC filled a room. Colossus helped read German teleprinter traffic. But every new task meant rewiring by hand — programming as physical labor.</p>
+        <p class="body-txt">In 1945 John von Neumann&rsquo;s report on the EDVAC, drawing on the ENIAC team&rsquo;s work, described a machine that keeps its instructions in memory beside its data. In 1948 the Manchester Baby ran the first stored program. Binary — nothing but on and off — became the only dialect the hardware would ever natively understand.</p>
       </div>
     </div>
   </div>
@@ -80,7 +83,7 @@
   <div class="chapter-inner">
     <div class="eyebrow">03 — 1954 to 1970</div>
     <h2 class="ch-title">One idea.<br>Many languages.</h2>
-    <p class="lede">FORTRAN, COBOL, ALGOL, LISP, BASIC — each one a bet that programmers shouldn't have to think like the machine. Drag the marker through history. The instruction never changes. Only how humans are asked to say it does.</p>
+    <p class="lede">FORTRAN, COBOL, ALGOL, LISP, BASIC — each one a bet that programmers shouldn't have to think like the machine. Grace Hopper&rsquo;s A-0 compiler (1952) made the bet first: let the machine do the translating. Drag the marker through history. The instruction never changes. Only how humans are asked to say it does.</p>
     <div id="ladder">
       <div id="ladder-display" class="mono"></div>
       <div id="ladder-track">
@@ -102,7 +105,7 @@
       <div id="terminal-out">READY.</div>
       <div id="terminal-line">&gt;<input id="terminal-input" class="mono" autocomplete="off" spellcheck="false" aria-label="BASIC terminal input"><span class="term-cursor"></span></div>
     </div>
-    <p class="body-txt tight">try: <span class="cmd">PRINT "HELLO"</span> · <span class="cmd">10 FOR I=1 TO 3</span> · <span class="cmd">LIST</span> · <span class="cmd">HELP</span></p>
+    <p class="body-txt tight term-hints">try: <button type="button" class="cmd">PRINT "HELLO"</button> <button type="button" class="cmd">10 FOR I=1 TO 3</button> <button type="button" class="cmd">20 PRINT "HELLO ";I</button> <button type="button" class="cmd">30 NEXT I</button> <button type="button" class="cmd">RUN</button> <button type="button" class="cmd">HELP</button></p>
   </div>
 </section>
 
@@ -112,8 +115,9 @@
     <div class="eyebrow">05 — 1989 to 1999</div>
     <h2 class="ch-title compact">A document<br>becomes a network.</h2>
   </div>
-  <div id="network-stage"></div>
-  <div id="network-caption">drag to rotate · scroll to descend from documents into servers into people</div>
+  <div id="network-stage" tabindex="0" aria-label="A 3D network of documents, servers and people. Arrow keys turn it; plus and minus fly in and out."></div>
+  <div id="network-zoom"><button type="button" data-z="-1" aria-label="Fly out">&minus;</button><button type="button" data-z="1" aria-label="Fly in">+</button></div>
+  <div id="network-caption"><span class="key"><i class="k-doc"></i>documents</span><span class="key"><i class="k-srv"></i>servers</span><span class="key"><i class="k-ppl"></i>people</span><span class="how">drag to turn · pinch, ctrl + scroll or +/&minus; to fly in</span></div>
 </section>
 
 <!-- 06 -->
@@ -132,8 +136,8 @@
     <div class="eyebrow">07 — 2012 to Now</div>
     <h2 class="ch-title">The language<br>turns around.</h2>
     <p class="lede max-34em">For seventy years, humans learned to speak like machines. Neural networks learn the opposite way: from patterns in language itself. A word becomes a token. Tokens fall into relationships. Relationships become the shape of what comes next.</p>
-    <div id="token-stage"><canvas id="token-canvas"></canvas></div>
-    <div id="token-caption">watch, or tap a word</div>
+    <div id="token-stage"><canvas id="token-canvas" tabindex="0" aria-label="A sentence broken into tokens. Tap a word, or use the arrow keys, to see what comes next." aria-describedby="token-caption"></canvas></div>
+    <div id="token-caption" aria-live="polite">watch, or tap a word</div>
     <p class="lede closing">What comes after programming?</p>
   </div>
 </section>

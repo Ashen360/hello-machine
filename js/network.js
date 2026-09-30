@@ -7,7 +7,12 @@
   const hasWebGL = ML.hasWebGL;
   const onScreenGate = ML.onScreenGate;
   const stage = document.getElementById('network-stage');
-  if(!hasWebGL){ stage.style.display='none'; return; }
+  if(!hasWebGL){
+    stage.style.display='none';
+    document.getElementById('network-zoom').hidden = true;
+    document.querySelector('#network-caption .how').textContent = 'the 3D network needs WebGL, which this browser has turned off';
+    return;
+  }
   let scene,camera,renderer,group,raf=null,active=false;
   let rotY=0, rotX=-0.15, dragging=false,lastX=0,lastY=0,velY=0.0009,velX=0;
   let camZ=42;
@@ -37,6 +42,7 @@
     const dl = new THREE.DirectionalLight(0xffffff,0.7); dl.position.set(4,6,8); scene.add(dl);
 
     group = new THREE.Group(); scene.add(group);
+    group.position.set(offsetX(), -1.5, 0);
     const nodes=[]; const N=90;
     for(let i=0;i<N;i++){
       const r = 14+Math.random()*10;
@@ -63,9 +69,22 @@
     group.add(lines);
     camera.position.set(0,0,camZ);
 
-    stage.addEventListener('pointerdown',e=>{dragging=true;lastX=e.clientX;lastY=e.clientY;});
-    window.addEventListener('pointerup',()=>dragging=false);
+    const pointers = new Map();
+    let pinchDist = 0;
+    const spread = () => { const [a,b] = [...pointers.values()]; return Math.hypot(a.x-b.x, a.y-b.y); };
+    stage.addEventListener('pointerdown',e=>{
+      pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+      if(pointers.size===2){ dragging=false; pinchDist=spread(); return; }
+      dragging=true; lastX=e.clientX; lastY=e.clientY;
+    });
+    const release = e=>{ pointers.delete(e.pointerId); if(pointers.size<2) pinchDist=0; if(!pointers.size) dragging=false; };
+    window.addEventListener('pointerup',release);
+    window.addEventListener('pointercancel',release);
     window.addEventListener('pointermove',e=>{
+      if(pointers.has(e.pointerId)) pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+      if(pointers.size===2 && pinchDist){
+        const d=spread(); zoomBy((pinchDist-d)*0.06); pinchDist=d; return;
+      }
       if(!dragging) return;
       const dx=e.clientX-lastX, dy=e.clientY-lastY;
       velY=dx*0.004; velX=dy*0.003;
@@ -73,14 +92,27 @@
       lastX=e.clientX; lastY=e.clientY;
     });
     stage.addEventListener('wheel',e=>{
-      camZ = Math.max(6, Math.min(50, camZ + e.deltaY*0.02));
+      if(!(e.ctrlKey || e.metaKey)) return;
       e.preventDefault();
+      zoomBy(e.deltaY*0.02);
     },{passive:false});
+    stage.addEventListener('keydown',e=>{
+      const turn={ArrowLeft:[-0.02,0],ArrowRight:[0.02,0],ArrowUp:[0,-0.08],ArrowDown:[0,0.08]}[e.key];
+      if(turn){ e.preventDefault(); velY=turn[0]; rotX=Math.max(-1,Math.min(0.4,rotX+turn[1])); }
+      if(e.key==='+' || e.key==='='){ e.preventDefault(); zoomBy(-8); }
+      if(e.key==='-' || e.key==='_'){ e.preventDefault(); zoomBy(8); }
+    });
     window.addEventListener('resize',()=>{
       const w2=stage.clientWidth,h2=stage.clientHeight;
       camera.aspect=w2/h2; camera.updateProjectionMatrix(); renderer.setSize(w2,h2);
+      group.position.x = offsetX();
     });
   }
+  function offsetX(){ return stage.clientWidth > 820 ? 6 : 0; }
+  function zoomBy(d){ camZ = Math.max(6, Math.min(50, camZ + d)); }
+  document.querySelectorAll('#network-zoom button').forEach(b=>{
+    b.addEventListener('click',()=>zoomBy(-8*Number(b.dataset.z)));
+  });
   function loop(){
     if(!active) return;
     if(!dragging){ velY*=0.95; velX*=0.95; rotY+=velY+(reduceMotion?0:0.0006); }

@@ -17,6 +17,7 @@
     if(e.key!=='Enter' || !input.value.trim()) return;
     const text = input.value.trim();
     input.blur();
+    window.dispatchEvent(new CustomEvent('ml:final',{detail:{text}}));
     wrap.classList.add('show');
     setTimeout(()=>{ resize(); animate(text); },820);
   });
