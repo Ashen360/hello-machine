@@ -139,7 +139,7 @@ p.body-txt.tight{margin-top:14px;}
   .chapter{padding:80px 22px;}
   #nav{display:none;}
   #progress.on{display:block;}
-  #era-label{top:14px;left:16px;}
+  #era-label{top:10px;left:10px;padding:4px 6px;background:color-mix(in srgb,var(--bg) 88%,transparent);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);}
   #message{left:16px;right:16px;bottom:16px;max-width:none;}
 }
 @media (prefers-reduced-motion:reduce){#message,.nav-tip,#progress-fill{transition:none;}}
